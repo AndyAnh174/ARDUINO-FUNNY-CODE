@@ -1,5 +1,5 @@
 int relay1 = 20;
-
+int relay2= 10;
 void setup() {
   Serial.begin(9600);
   pinMode(relay1,OUTPUT);
