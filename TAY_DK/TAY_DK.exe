@@ -1,0 +1,98 @@
+# 1 "D:\\CODE ARDUINO\\CODE\\TAY_DK\\TAY_DK.ino"
+
+SoftwareSerial mySerial(11, 10);
+int rx_data1;
+char rx_data;
+String storedData = "";
+String storedData1 = "";
+ 
+int Pot_Val_Y = 0;
+int Pot_Val_X = 0;
+unsigned char Tx_command = 0;
+ 
+
+
+
+U8GLIB_SH1106_128X64 u8g(U8G_I2C_OPT_NONE);
+
+void draw(void) {
+   
+   u8g.setFont(u8g_font_fur14);
+  u8g.drawStr( 0, 22, "CM: ");
+  u8g.setPrintPos(0, 50);
+  u8g.setFont(u8g_font_fur14);
+  u8g.print(rx_data1);
+}
+
+void setup() 
+{
+ Serial.begin(9600);
+ mySerial.begin(9600);
+ pinMode(A2 , INPUT);
+
+if ( u8g.getMode() == U8G_MODE_R3G3B2 ) {
+    u8g.setColorIndex(255);      
+  }
+  else if ( u8g.getMode() == U8G_MODE_GRAY2BIT ) {
+    u8g.setColorIndex(3);          
+  }
+  else if ( u8g.getMode() == U8G_MODE_BW ) {
+    u8g.setColorIndex(1);          
+  }
+  else if ( u8g.getMode() == U8G_MODE_HICOLOR ) {
+    u8g.setHiColorByRGB(255,255,255);
+  }
+}
+
+void loop() 
+{ 
+u8g.firstPage();
+do {
+   Pot_Val_Y = analogRead(A1);
+ Pot_Val_X = analogRead(A0);
+ if(Pot_Val_X > 600)  
+ {
+  mySerial.println(4); 
+  delay(300);
+ }
+ if(Pot_Val_X < 400)  
+ {
+  mySerial.println(3); 
+  delay(300);
+ }
+ if(Pot_Val_Y > 600)  
+ {
+  mySerial.println(2); 
+  delay(300);
+ }
+ if(Pot_Val_Y < 400)  
+ {
+  mySerial.println(1); 
+  delay(300);
+ }
+ int val = analogRead(A2 );
+ val = map(val, 0, 843, 5, 175);
+ mySerial.println(val);
+ delay(300);
+ if(mySerial.available())
+ {
+  while(mySerial.available())  
+  {
+   rx_data = mySerial.read();        
+   storedData += rx_data;            
+  }
+ }
+ if(storedData.length() >0)  
+ {
+  storedData1 = storedData;
+  storedData="";                     
+  rx_data1=storedData1.toInt();      
+  Serial.println(rx_data1);
+ }
+ delay(300); 
+    draw();
+  } while( u8g.nextPage() );
+  
+   
+  delay(50);
+}
